@@ -5,6 +5,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { initFileKeyPair } from '~/utils/file'
 import usersRoute from '~/routes/users.routes'
+import cors from 'cors'
 
 config()
 const app = express()
@@ -19,6 +20,9 @@ app.use(compression())
 
 // init privateKey vs publicKey
 initFileKeyPair()
+// config cors
+app.use(cors())
+
 // init routes
 app.use('/v1/api/users', usersRoute)
 

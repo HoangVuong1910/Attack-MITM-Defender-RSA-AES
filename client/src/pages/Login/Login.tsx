@@ -1,0 +1,106 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Link, useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { Schema, schema } from '../../utils/rules'
+import authApi from '../../apis/auth.api'
+import { isAxiosUnprocessableEnityError } from '../../utils/utils'
+import { ErrorResponse } from '../../types/utils.type'
+import Input from '../../components/Input'
+import Button from '../../components/Button'
+import path from '../../constants/path'
+import { usePublicKey } from '../../hooks/usePublicKey'
+
+type FormData = Pick<Schema, 'email' | 'password'>
+const loginSchema = schema.pick(['email', 'password'])
+export default function Login() {
+  const publicKey = usePublicKey()
+  console.log('publicKey', publicKey)
+  const navigate = useNavigate()
+  const {
+    register,
+    setError,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<FormData>({
+    resolver: yupResolver(loginSchema)
+  })
+
+  const loginAccountMutation = useMutation({
+    mutationFn: (body: FormData) => authApi.loginAccount(body)
+  })
+
+  const onSubmit = handleSubmit((data) => {
+    console.log(data)
+    loginAccountMutation.mutate(data, {
+      onSuccess: (data) => {
+        // console.log(data)
+        // setIsAuthenticated(true)
+        // setProfile(data.data.data.user)
+        // navigate('/')
+      },
+      onError: (error) => {
+        if (isAxiosUnprocessableEnityError<ErrorResponse<FormData>>(error)) {
+          const formError = error.response?.data.data
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              setError(key as keyof FormData, {
+                message: formError[key as keyof FormData],
+                type: 'Server'
+              })
+            })
+          }
+        }
+      }
+    })
+  })
+
+  return (
+    <div className='bg-orange'>
+      <div className='container'>
+        <div className='grid grid-cols-1 py-12 lg:grid-cols-5 lg:py-32 lg:pr-10'>
+          <div className='lg:col-span-2 lg:col-start-4'>
+            <form className='rounded bg-white p-10 shadow-sm' onSubmit={onSubmit}>
+              <div className='text-2xl'>Đăng nhập</div>
+              <Input
+                className='mt-8'
+                name='email'
+                register={register}
+                type='email'
+                errorMessage={errors.email?.message}
+                placeholder='Email'
+              />
+
+              <Input
+                className='mt-2'
+                name='password'
+                register={register}
+                type='password'
+                errorMessage={errors.password?.message}
+                placeholder='Password'
+                autoComplete='on'
+              />
+              <div className='mt-3'>
+                <Button
+                  type='submit'
+                  className='flex w-full items-center justify-center bg-red-500 px-2 py-4 text-center text-sm uppercase text-white hover:bg-red-600'
+                  isLoading={loginAccountMutation.isPending}
+                  disabled={loginAccountMutation.isPending}
+                >
+                  Đăng nhập
+                </Button>
+              </div>
+              <div className='mt-8 flex items-center justify-center'>
+                <span className='[text-gray-400'>Bạn chưa có tài khoản?</span>
+                <Link className='ml-1 text-red-400' to={path.register}>
+                  Đăng ký
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

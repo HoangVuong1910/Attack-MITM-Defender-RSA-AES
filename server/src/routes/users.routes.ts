@@ -12,6 +12,6 @@ usersRoute.get('/public-key', wrapRequestHandler(getPublicKeyController))
 /**
  * API xử lý login, giải mã dữ liệu từ client
  */
-usersRoute.post('login', wrapRequestHandler(loginController))
+usersRoute.post('/login', wrapRequestHandler(loginController))
 
 export default usersRoute
