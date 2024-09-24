@@ -4,7 +4,7 @@ export const createKeyPairSync = async () => {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
     modulusLength: 2048,
     publicKeyEncoding: {
-      type: 'spki',
+      type: 'pkcs1',
       format: 'pem'
     },
     privateKeyEncoding: {

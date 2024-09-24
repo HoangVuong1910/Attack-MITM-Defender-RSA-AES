@@ -3,7 +3,7 @@ import { privateDecrypt, constants, createDecipheriv, createCipheriv } from 'cry
 class UsersService {
   getPublicKey() {
     const publicKey = fs.readFileSync('publicKey.pem', 'utf8')
-    return { publicKey }
+    return publicKey
   }
   async login({ encryptedAESKey, iv, encryptedData }: { encryptedAESKey: any; iv: any; encryptedData: any }) {
     /**
